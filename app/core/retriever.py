@@ -49,12 +49,16 @@ async def retrieve(
         List of RetrievedChunk ordered by descending similarity.
     """
     k = top_k or settings.RETRIEVAL_TOP_K
-    min_score = threshold or settings.SIMILARITY_THRESHOLD
+    min_score = threshold if threshold is not None else settings.SIMILARITY_THRESHOLD
 
     query_vector = await embed_query(query)
 
     # Build the similarity search query using pgvector's <=> (cosine distance)
     # cosine_similarity = 1 - cosine_distance
+    similarity_expr = (1 - DocumentChunk.embedding.cosine_distance(query_vector)).label(
+        "similarity"
+    )
+
     stmt = (
         select(
             DocumentChunk.id,
@@ -63,17 +67,17 @@ async def retrieve(
             DocumentChunk.content,
             DocumentChunk.page_number,
             Document.filename,
-            (1 - DocumentChunk.embedding.cosine_distance(query_vector)).label(
-                "similarity"
-            ),
+            similarity_expr,
         )
         .join(Document, Document.id == DocumentChunk.document_id)
-        .where(
-            (1 - DocumentChunk.embedding.cosine_distance(query_vector)) >= min_score
-        )
         .order_by(text("similarity DESC"))
         .limit(k)
     )
+
+    if min_score > 0:
+        stmt = stmt.where(
+            (1 - DocumentChunk.embedding.cosine_distance(query_vector)) >= min_score
+        )
 
     if document_ids:
         stmt = stmt.where(DocumentChunk.document_id.in_(document_ids))

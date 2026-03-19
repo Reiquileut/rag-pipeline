@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     # --- Retrieval ---
     RETRIEVAL_TOP_K: int = 5
-    SIMILARITY_THRESHOLD: float = 0.7
+    SIMILARITY_THRESHOLD: float = 0.0
 
     # --- CORS ---
     CORS_ORIGINS: List[str] = ["*"]

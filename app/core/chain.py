@@ -35,6 +35,11 @@ RAG_USER_PROMPT = """\
 Provide a well-structured answer with [Source N] citations.
 """
 
+DIRECT_SYSTEM_PROMPT = """\
+You are a helpful assistant. Answer the user's question clearly and concisely. \
+Be honest about the limits of your knowledge.\
+"""
+
 
 def _format_context(chunks: list[RetrievedChunk]) -> str:
     """Build a numbered context string from retrieved chunks."""
@@ -68,12 +73,17 @@ async def generate_answer(
         dict with keys: answer, model, usage
     """
     if not chunks:
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", DIRECT_SYSTEM_PROMPT),
+                ("human", "{question}"),
+            ]
+        )
+        chain = prompt | _get_llm() | StrOutputParser()
+        logger.info("No relevant chunks found — responding with direct LLM")
+        answer = await chain.ainvoke({"question": question})
         return {
-            "answer": (
-                "I couldn't find any relevant information in the uploaded documents "
-                "to answer your question. Please try rephrasing or uploading "
-                "additional documents."
-            ),
+            "answer": answer,
             "model": settings.LLM_MODEL,
             "usage": None,
         }

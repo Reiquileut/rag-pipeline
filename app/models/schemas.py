@@ -37,12 +37,29 @@ class IngestionResult(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    question: str = Field(..., min_length=1, max_length=2000)
+    question: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        json_schema_extra={"example": "What is this document about?"},
+    )
     document_ids: Optional[list[uuid.UUID]] = Field(
         default=None,
         description="Scope retrieval to specific documents. If None, search all.",
     )
-    top_k: Optional[int] = Field(default=None, ge=1, le=20)
+    top_k: Optional[int] = Field(default=5, ge=1, le=20)
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "question": "What is this document about?",
+                    "document_ids": None,
+                    "top_k": 5,
+                }
+            ]
+        }
+    }
 
 
 class Citation(BaseModel):
