@@ -2,10 +2,8 @@
 
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
-
 
 # ──────────────────────────── Documents ────────────────────────────
 
@@ -43,11 +41,11 @@ class ChatRequest(BaseModel):
         max_length=2000,
         json_schema_extra={"example": "What is this document about?"},
     )
-    document_ids: Optional[list[uuid.UUID]] = Field(
+    document_ids: list[uuid.UUID] | None = Field(
         default=None,
         description="Scope retrieval to specific documents. If None, search all.",
     )
-    top_k: Optional[int] = Field(default=5, ge=1, le=20)
+    top_k: int | None = Field(default=5, ge=1, le=20)
 
     model_config = {
         "json_schema_extra": {
@@ -66,10 +64,8 @@ class Citation(BaseModel):
     document_id: uuid.UUID
     filename: str
     chunk_index: int
-    content_preview: str = Field(
-        ..., description="First 300 chars of the retrieved chunk"
-    )
-    page_number: Optional[int] = None
+    content_preview: str = Field(..., description="First 300 chars of the retrieved chunk")
+    page_number: int | None = None
     similarity_score: float
 
 
@@ -77,7 +73,7 @@ class ChatResponse(BaseModel):
     answer: str
     citations: list[Citation]
     model: str
-    usage: Optional[dict] = None
+    usage: dict | None = None
 
 
 # ──────────────────────────── Health ───────────────────────────────

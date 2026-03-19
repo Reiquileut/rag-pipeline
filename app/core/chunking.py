@@ -1,7 +1,7 @@
 """Text chunking strategies for splitting documents into embeddable pieces."""
 
 import logging
-from enum import Enum
+from enum import StrEnum
 
 import tiktoken
 from langchain_text_splitters import (
@@ -14,7 +14,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-class ChunkStrategy(str, Enum):
+class ChunkStrategy(StrEnum):
     RECURSIVE = "recursive"
     TOKEN = "token"
 
@@ -73,5 +73,7 @@ def chunk_pages(
             )
             global_index += 1
 
-    logger.info("Chunked %d pages into %d chunks (strategy=%s)", len(pages), len(chunks), strategy.value)
+    logger.info(
+        "Chunked %d pages into %d chunks (strategy=%s)", len(pages), len(chunks), strategy.value
+    )
     return chunks

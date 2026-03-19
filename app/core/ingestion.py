@@ -1,7 +1,5 @@
 """Document ingestion: parse uploaded files into raw text."""
 
-import os
-import tempfile
 from pathlib import Path
 
 from langchain_community.document_loaders import (
@@ -20,7 +18,7 @@ SUPPORTED_TYPES = {
 }
 
 
-class UnsupportedFileType(Exception):
+class UnsupportedFileTypeError(Exception):
     """Raised when the uploaded file type is not supported."""
 
 
@@ -35,7 +33,7 @@ async def extract_text(file_path: str, content_type: str) -> list[dict]:
     """
     file_ext = SUPPORTED_TYPES.get(content_type)
     if file_ext is None:
-        raise UnsupportedFileType(
+        raise UnsupportedFileTypeError(
             f"Unsupported file type: {content_type}. "
             f"Supported: {', '.join(SUPPORTED_TYPES.values())}"
         )

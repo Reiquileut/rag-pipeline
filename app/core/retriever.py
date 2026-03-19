@@ -75,9 +75,7 @@ async def retrieve(
     )
 
     if min_score > 0:
-        stmt = stmt.where(
-            (1 - DocumentChunk.embedding.cosine_distance(query_vector)) >= min_score
-        )
+        stmt = stmt.where((1 - DocumentChunk.embedding.cosine_distance(query_vector)) >= min_score)
 
     if document_ids:
         stmt = stmt.where(DocumentChunk.document_id.in_(document_ids))

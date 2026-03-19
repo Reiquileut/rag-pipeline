@@ -4,13 +4,13 @@ import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.core.chunking import ChunkStrategy, chunk_pages
 from app.core.embeddings import embed_texts
-from app.core.ingestion import UnsupportedFileType, extract_text, save_upload
+from app.core.ingestion import UnsupportedFileTypeError, extract_text, save_upload
 from app.db.database import get_session
 from app.db.vector_store import Document, DocumentChunk
 from app.models.schemas import DocumentListOut, DocumentOut, IngestionResult
@@ -47,8 +47,10 @@ async def upload_document(
     try:
         file_path = await save_upload(contents, file.filename)
         pages = await extract_text(file_path, file.content_type)
-    except UnsupportedFileType as exc:
-        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc))
+    except UnsupportedFileTypeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc)
+        ) from exc
 
     if not pages:
         raise HTTPException(
@@ -100,9 +102,7 @@ async def upload_document(
 @router.get("/documents", response_model=DocumentListOut, summary="List all documents")
 async def list_documents(session: AsyncSession = Depends(get_session)):
     """Return all ingested documents ordered by creation date."""
-    result = await session.execute(
-        select(Document).order_by(Document.created_at.desc())
-    )
+    result = await session.execute(select(Document).order_by(Document.created_at.desc()))
     docs = result.scalars().all()
     return DocumentListOut(
         total=len(docs),

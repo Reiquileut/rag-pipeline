@@ -1,7 +1,6 @@
 """Generate embeddings for text chunks using OpenAI models."""
 
 import logging
-from typing import List
 
 from langchain_openai import OpenAIEmbeddings
 

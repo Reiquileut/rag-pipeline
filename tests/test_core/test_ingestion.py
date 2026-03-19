@@ -5,7 +5,7 @@ import tempfile
 
 import pytest
 
-from app.core.ingestion import UnsupportedFileType, extract_text, save_upload
+from app.core.ingestion import UnsupportedFileTypeError, extract_text, save_upload
 
 
 class TestSaveUpload:
@@ -25,7 +25,7 @@ class TestExtractText:
         with tempfile.NamedTemporaryFile(suffix=".xyz", delete=False) as f:
             f.write(b"data")
             f.flush()
-            with pytest.raises(UnsupportedFileType):
+            with pytest.raises(UnsupportedFileTypeError):
                 await extract_text(f.name, "application/octet-stream")
             os.unlink(f.name)
 

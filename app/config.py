@@ -1,7 +1,6 @@
 """Centralised application settings loaded from environment variables."""
 
 from functools import lru_cache
-from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -37,7 +36,7 @@ class Settings(BaseSettings):
     SIMILARITY_THRESHOLD: float = 0.0
 
     # --- CORS ---
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["*"]
 
     # --- Upload ---
     MAX_UPLOAD_SIZE_MB: int = 50
